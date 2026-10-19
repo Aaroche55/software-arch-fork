@@ -2,6 +2,13 @@ import json
 from datetime import datetime
 import matplotlib.pyplot as plt
 
+
+def duration_to_hours(duration_text):
+    """Convert a duration string like '2:30' into hours as a float."""
+    hours, minutes = map(int, duration_text.split(":"))
+    return hours + minutes / 60
+
+
 with open("eva-data.json", "r", encoding="utf-8") as file:
     eva_data = json.load(file)
 
@@ -15,9 +22,7 @@ for eva in eva_data:
         continue
 
     date = datetime.fromisoformat(date_text)
-    hours, minutes = map(int, duration_text.split(":"))
-    duration_hours = hours + minutes / 60
-
+    duration_hours = duration_to_hours(duration_text)
     records.append((date, duration_hours))
 
 records.sort(key=lambda record: record[0])
@@ -31,29 +36,23 @@ for date, duration_hours in records:
     dates.append(date)
     cumulative_hours.append(total_hours)
 
+# Ask the user which country to summarise (countries in the data: USA, Russia)
+selected_country = input("Enter a country (USA or Russia): ").strip()
+
 total_hours_per_country = 0
 
-#loop that allows you to set a country value and the total cumulative EVA hours for that country will be printed to the terminal
-#Pretty clunky to be hardcoding the country value, implementation should be improved
-#hours + minutes -> hours conversion is also duplicated from lines 18-19, could probably be moved into its own function
 for eva in eva_data:
-        
-        duration_text = eva.get("duration")
-        if not duration_text:
-            continue
+    duration_text = eva.get("duration")
+    if not duration_text:
+        continue
 
-        if eva.get("country") == "Russia":
-            hours, minutes = map(int, duration_text.split(":"))
-            duration_hours = hours + minutes / 60
-            total_hours_per_country += duration_hours
+    if eva.get("country") == selected_country:
+        total_hours_per_country += duration_to_hours(duration_text)
 
-            
+print(f"Total EVA hours for {selected_country} is: {total_hours_per_country}")
 
-print(f"Total EVA hours for selected country is: {total_hours_per_country}")
-    
-#adding functionality for user to input year and program to output the number of EVAs in that year and their total duration in hours
-
-selected_year = input("Enter a year: ")
+# Ask for a year and report EVA count and total duration for that year
+selected_year = input("Enter a year: ").strip()
 
 total_eva_in_year = 0
 total_hours_per_year = 0
@@ -68,19 +67,13 @@ for eva in eva_data:
     if date_text[:4] != selected_year:
         continue
 
-    hours, minutes = map(int, duration_text.split(":"))
-    duration_hours = hours + minutes / 60
-
     total_eva_in_year += 1
-    total_hours_per_year += duration_hours
+    total_hours_per_year += duration_to_hours(duration_text)
 
 print(f"Total EVAs in {selected_year} was: {total_eva_in_year}")
 print(f"Total duration of EVAs in {selected_year} was: {total_hours_per_year}")
 
-
-
-
-#original graph of cumulative EVA hours over years
+# Graph of cumulative EVA hours over years
 plt.plot(dates, cumulative_hours)
 plt.xlabel("Year")
 plt.ylabel("Cumulative EVA duration (hours)")
