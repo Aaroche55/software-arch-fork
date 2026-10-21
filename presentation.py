@@ -18,6 +18,30 @@ def show_year_stats(year, count, total_hours):
     print(f"Total duration of EVAs in {year} was: {total_hours}")
 
 
+def ask_comparison():
+    country_a = input("Enter country A: ").strip()
+    country_b = input("Enter country B: ").strip()
+    start_year = input("Enter start year: ").strip()
+    end_year = input("Enter end year: ").strip()
+    return country_a, country_b, start_year, end_year
+
+
+def show_error(message):
+    print(f"Error: {message}")
+
+
+def show_comparison(country_a, country_b, start_year, end_year, stats_a, stats_b, leader):
+    print(f"EVA comparison {start_year}-{end_year}:")
+    for country, (count, total, average) in ((country_a, stats_a), (country_b, stats_b)):
+        average_text = f"{average:.2f} hours" if average is not None else "unavailable"
+        print(f"  {country}: {count} EVAs, {total:.2f} hours total, average {average_text}")
+
+    if leader:
+        print(f"{leader} has the greater total EVA duration")
+    else:
+        print("It's a tie")
+
+
 def plot_cumulative(dates, cumulative_hours, output_path):
     plt.plot(dates, cumulative_hours)
     plt.xlabel("Year")
